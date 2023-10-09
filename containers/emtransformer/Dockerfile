@@ -1,3 +1,4 @@
+# Can we use pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime instead? it should be 3 times smaller
 FROM nvidia/cuda:12.2.0-devel-ubuntu20.04
 
 ENV PATH /opt/conda/bin:$PATH
