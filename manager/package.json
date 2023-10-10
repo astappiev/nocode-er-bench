@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "dependencies": {
+    "bullmq": "^4.12.2"
+  }
+}

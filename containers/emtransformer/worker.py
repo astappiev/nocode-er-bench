@@ -8,6 +8,13 @@ async def process(job, job_token):
     # job.data will include the data added to the queue
     # TODO: override some params from job.data
 
+    # Job input
+    # - epochs
+    # -? model_type
+    # - data_test
+    # - data_train
+    # - data_valid
+
     subprocess.run([
         "python3",
         "/methods/DLMatchers/EMTransformer/src/run_all.py",
@@ -21,6 +28,11 @@ async def process(job, job_token):
         "--num_epochs=15.0",
         "--seed=22",
     ], stderr=sys.stderr, stdout=sys.stdout)
+
+    # Job output
+    # - f1
+    # -? precision
+    # -? recall
 
 async def main():
     queue_server = os.environ['REDIS_SERVER'] # the line should be like "rediss://<user>:<password>@<host>:<port>"
