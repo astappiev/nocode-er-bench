@@ -1,4 +1,4 @@
-# Deep Learning-based Entity Matching Demo
+# No-code Benchmarking of Entity Resolution
 
 https://swimlanes.io/u/k3Rmy375P
 

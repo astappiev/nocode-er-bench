@@ -30,8 +30,11 @@ export default function Home() {
     {code: 'D10', name: 'Movies'},
   ];
 
-  const [algorithms, setAlgorithms] = useState(null)
-  const [isLoading, setLoading] = useState(true)
+  // data
+  const [algorithms, setAlgorithms] = useState(null);
+  const [results, setResults] = useState({});
+
+  // fields
   const [selectedScenario, setSelectedScenario] = useState(scenarios[0]);
   const [selectedDataset, setSelectedDataset] = useState(null);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
@@ -39,10 +42,11 @@ export default function Home() {
   const [epochs, setEpochs] = useState(10);
   const [email, setEmail] = useState('');
 
+  // state
+  const [isLoading, setLoading] = useState(true);
   const [formDisabled, setDisabled] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showResults, setShowResults] = useState(false);
-  const [results, setResults] = useState({});
 
   useEffect(() => {
     fetch('/api/algorithms')
@@ -85,6 +89,7 @@ export default function Home() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          scenario: selectedScenario.code,
           dataset: selectedDataset.code,
           algorithm: selectedAlgorithm.code,
           recall: recall,
