@@ -1,6 +1,6 @@
 # Deep Learning-based Entity Matching Demo
 
-https://swimlanes.io/d/hih1NBx5X
+https://swimlanes.io/u/k3Rmy375P
 
 This is great news! The main requirement is to implement the following process:
     to set several DL-based matching algorithms running on a server as Docker containers
