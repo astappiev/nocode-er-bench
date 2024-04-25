@@ -17,21 +17,9 @@ export default function Home() {
     {code: 'progress', name: 'Progressive'},
   ];
 
-  const datasets = [
-    {code: 'D1', name: 'Restaurants'},
-    {code: 'D2', name: 'Abt-Buy'},
-    {code: 'D3', name: 'Amazon-Google Products'},
-    {code: 'D4', name: 'DBLP-ACM'},
-    {code: 'D5', name: 'IMDB-TMDB'},
-    {code: 'D6', name: 'IMDB-TVDB'},
-    {code: 'D7', name: 'TMDB-TVDB'},
-    {code: 'D8', name: 'Amazon-Walmart'},
-    {code: 'D9', name: 'DBLP-Scholar'},
-    {code: 'D10', name: 'Movies'},
-  ];
-
   // data
   const [algorithms, setAlgorithms] = useState(null);
+  const [datasets, setDatasets] = useState(null);
   const [results, setResults] = useState({});
 
   // fields
@@ -52,10 +40,17 @@ export default function Home() {
     fetch('/api/algorithms')
       .then((res) => res.json())
       .then((data) => {
-        setAlgorithms(data)
-        setSelectedAlgorithm(data.find(algo => algo.scenarios.includes(selectedScenario.code)))
-        setLoading(false)
-      })
+        setAlgorithms(data);
+        setSelectedAlgorithm(data.find(algo => algo.scenarios.includes(selectedScenario.code)));
+        setLoading(!algorithms || !datasets);
+      });
+
+    fetch('/api/datasets')
+      .then((res) => res.json())
+      .then((data) => {
+        setDatasets(data);
+        setLoading(!algorithms || !datasets);
+      });
   }, [])
 
   const onSubmit = (e) => {
@@ -107,7 +102,7 @@ export default function Home() {
   }
 
   if (isLoading) return <p>Loading...</p>
-  if (!algorithms) return <p>Something went wrong</p>
+  if (!algorithms || !datasets) return <p>Something went wrong</p>
 
   return <div>
     <h1 className="text-4xl font-bold">No-code Benchmarking of Entity Resolution</h1>
