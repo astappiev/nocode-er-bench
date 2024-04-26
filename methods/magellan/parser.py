@@ -30,6 +30,8 @@ def entry_args():
                         help='Input directory containing the dataset')
     parser.add_argument('output', type=writeable_dir, nargs='?', default='/data/output',
                         help='Output directory to store the output')
+    parser.add_argument('-t', '--temp', type=writeable_dir, nargs='?', default='/tmpdir',
+                        help='A folder to store temporary files')
     parser.add_argument('-r', '--recall', type=int, nargs='?',
                         help='Recall value for the algorithm')
     parser.add_argument('-e', '--epochs', type=int, nargs='?',

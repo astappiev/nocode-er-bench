@@ -1,11 +1,17 @@
-import sys
 import csv
 import os
 import shutil
+import sys
 
 
-def transform_dataset(source_dir, dest_dir):
-    # Copy tableA.csv and tableB.csv
+def transform_input(source_dir, dest_dir):
+    # The source directory contains the following files (in common format for all methods):
+    # - tableA.csv (where the first row is the header, and it has to contain the id attribute)
+    # - tableB.csv (same as tableA.csv)
+    # - matches.csv (should have tableA_id, tableB_id attributes, which means that the tableA_id record is a match with the tableB_id record)
+    #
+    # The output directory should contain the files converted into the format expected by the method.
+
     shutil.copyfile(os.path.join(source_dir, 'tableA.csv'), os.path.join(dest_dir, 'tableA.csv'))
     shutil.copyfile(os.path.join(source_dir, 'tableB.csv'), os.path.join(dest_dir, 'tableB.csv'))
 
@@ -45,6 +51,16 @@ def transform_dataset(source_dir, dest_dir):
         w.writerows(rows)
 
 
+def transform_output(source_dir, dest_dir):
+    # The source directory contains the output from the method.
+    # This should be converted to one common format from all methods and stored into the destination directory.
+    # Metrics.csv: F1, Precision, Recall, Time (1 row, 4 columns)
+    # predictions.csv: tableA_id, tableB_id, etc. (should have at least 2 columns and a header row)
+
+    # TODO: Implement this function
+    return None
+
+
 if __name__ == "__main__":
     in_path = sys.argv[1]
     out_path = sys.argv[2]
@@ -52,4 +68,4 @@ if __name__ == "__main__":
     if not os.path.isdir(out_path):
         os.mkdir(out_path)
 
-    transform_dataset(in_path, out_path)
+    transform_input(in_path, out_path)
