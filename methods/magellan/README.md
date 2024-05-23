@@ -7,7 +7,6 @@ The image should contain the source code of the method and input + output transf
 
 ## Structure
 - [Dockerfile](Dockerfile) should contain the instructions to build the docker image.
-- [parser.py](parser.py) contains argument parser that takes into account user input and passes it to the method.
 - [transform.py](transform.py) contains pre-processing and post-processing functions that will be applied to the input and output data.
 - [entrypoint.py](entrypoint.py) should contain the main method that will be executed inside the docker container.
 

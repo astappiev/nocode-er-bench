@@ -1,12 +1,25 @@
 import os
+import argparse
+import pathtype
 
 import py_entitymatching as em
 
 from transform import transform_input, transform_output
-from parser import entry_args
 
 
-args = entry_args().parse_args()
+parser = argparse.ArgumentParser(description='Benchmark a dataset with a method')
+parser.add_argument('input', type=pathtype.Path(readable=True), nargs='?', default='/data',
+                    help='Input directory containing the dataset')
+parser.add_argument('output', type=pathtype.Path(writable=True), nargs='?', default='/data/output',
+                    help='Output directory to store the output')
+parser.add_argument('-t', '--temp', type=pathtype.Path(writable_or_creatable=True), nargs='?', default='/tmpdir',
+                    help='A folder to store temporary files')
+parser.add_argument('-r', '--recall', type=int, nargs='?',
+                    help='Recall value for the algorithm')
+parser.add_argument('-e', '--epochs', type=int, nargs='?',
+                    help='Number of epochs for the algorithm')
+
+args = parser.parse_args()
 
 print("Hi, I'm Magellan entrypoint!")
 print("Input directory: ", os.listdir(args.input))
