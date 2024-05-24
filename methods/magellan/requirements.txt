@@ -1,2 +1,4 @@
 pathtype
+numpy
+fcntl
 py-entitymatching

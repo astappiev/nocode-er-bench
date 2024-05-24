@@ -54,7 +54,7 @@ def transform_input(source_dir, dest_dir):
 def transform_output(source_dir, dest_dir):
     # The source directory contains the output from the method.
     # This should be converted to one common format from all methods and stored into the destination directory.
-    # Metrics.csv: F1, Precision, Recall, Time (1 row, 4 columns)
+    # metrics.csv: F1, Precision, Recall, Time (1 row, 4 columns)
     # predictions.csv: tableA_id, tableB_id, etc. (should have at least 2 columns and a header row)
 
     # TODO: Implement this function

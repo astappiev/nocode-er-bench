@@ -2,8 +2,7 @@ FROM python:3.11
 
 WORKDIR /worker
 COPY requirements.txt .
-COPY transform.py .
-COPY entrypoint.py .
+COPY *.py .
 
 RUN pip install --no-cache-dir -r requirements.txt
 

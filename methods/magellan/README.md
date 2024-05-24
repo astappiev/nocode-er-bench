@@ -1,6 +1,7 @@
 # Magellan
 
 https://github.com/anhaidgroup/py_entitymatching
+https://github.com/nishadi/py_entitymatching_sample
 
 The docker image should be self-contained and should be able to run the method without any additional user input.
 The image should contain the source code of the method and input + output transformers.
