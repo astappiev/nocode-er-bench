@@ -1,0 +1,3 @@
+[submodule "splitter/DeepBlocker"]
+	path = splitter/DeepBlocker
+	url = https://github.com/qcri/DeepBlocker.git

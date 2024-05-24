@@ -18,3 +18,6 @@ I forgot to mention that the dataset is here: https://github.com/gpapadis/DLMatc
 
 docker build -t emtransformer emtransformer
 docker run -it --entrypoint=/bin/bash --gpus all  emtransformer
+
+Some more matcher scripts are available here:
+https://github.com/nishadi/DLMatchers/tree/main/dockers/mostmatchers/scripts
