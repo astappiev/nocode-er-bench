@@ -1,4 +1,6 @@
-To test the **HierMatcher** docker, use the following commands:
+# HierMatcher
+
+https://github.com/nishadi/EntityMatcher
 
 * cd ..
 * eval "$(conda shell.bash hook)"

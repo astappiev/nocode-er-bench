@@ -1,14 +1,28 @@
-FROM pytorch/pytorch:1.7.1-cuda11.0-cudnn8-runtime
-RUN apt-get update && apt-get install -y unzip build-essential wget git
-RUN conda create -n deepmatcher python=3.6 -y
-SHELL ["conda", "run", "-n", "deepmatcher", "/bin/bash", "-c"]
-RUN pip install deepmatcher
-RUN mkdir /root/.vector_cache
-RUN wget https://dl.fbaipublicfiles.com/fasttext/vectors-wiki/wiki.en.zip --directory-prefix=/root/.vector_cache
-RUN unzip /root/.vector_cache/wiki.en.zip -d /root/.vector_cache/
-RUN rm /root/.vector_cache/wiki.en.vec
-RUN rm /root/.vector_cache/wiki.en.zip
-WORKDIR /methods
-RUN git clone https://github.com/nishadi/EntityMatcher.git
-WORKDIR /methods/EntityMatcher/embedding/
-RUN wget https://zenodo.org/record/6466387/files/wiki.en.bin
+FROM pytorch/pytorch:1.10.0-cuda11.3-cudnn8-devel
+
+RUN apt-get update --allow-insecure-repositories && \
+    apt-get install -y unzip build-essential wget && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir deepmatcher
+
+WORKDIR /worker
+
+# Download the EntityMatcher code
+RUN wget https://github.com/nishadi/EntityMatcher/archive/refs/heads/master.zip && \
+    unzip master.zip && \
+    mv EntityMatcher-master/* . && \
+    rm -rf master.zip EntityMatcher-master && \
+    rm -rf data # Remove datasets
+
+# Download the pre-trained model on English Wikipedia
+ADD https://zenodo.org/record/6466387/files/wiki.en.bin /worker/embedding
+
+COPY requirements.txt .
+COPY *.py .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+# This allows to run the container as `docker run --rm <yourImageName> <args>`
+ENTRYPOINT ["python", "-u", "./entrypoint.py"]
+CMD []
