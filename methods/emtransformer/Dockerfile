@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y git
 RUN git clone https://github.com/gpapadis/DLMatchers.git
 
 # Install worker script
-WORKDIR /worker
+WORKDIR /workspace
 COPY worker.py .
 RUN pip install --no-cache-dir bullmq
 CMD ["python3", "./worker.py"]

@@ -6,7 +6,7 @@ RUN apt-get update --allow-insecure-repositories && \
 
 RUN pip install --no-cache-dir deepmatcher
 
-WORKDIR /worker
+WORKDIR /workspace
 
 # Download the EntityMatcher code
 RUN wget https://github.com/nishadi/EntityMatcher/archive/refs/heads/master.zip && \
@@ -16,7 +16,7 @@ RUN wget https://github.com/nishadi/EntityMatcher/archive/refs/heads/master.zip 
     rm -rf data # Remove datasets
 
 # Download the pre-trained model on English Wikipedia
-ADD https://zenodo.org/record/6466387/files/wiki.en.bin /worker/embedding
+ADD https://zenodo.org/record/6466387/files/wiki.en.bin /workspace/embedding
 
 COPY requirements.txt .
 COPY *.py .
