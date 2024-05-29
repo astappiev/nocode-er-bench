@@ -1,29 +1,27 @@
 import os
 import argparse
-import logging
 import time
-import resource
-import csv
+import random
 
-import fcntl
 import pathtype
+import pandas as pd
 import numpy as np
 import py_entitymatching as em
-
 from transform import transform_input, transform_output
-
+from sklearn.preprocessing import StandardScaler
 
 parser = argparse.ArgumentParser(description='Benchmark a dataset with a method')
 parser.add_argument('input', type=pathtype.Path(readable=True), nargs='?', default='/data',
                     help='Input directory containing the dataset')
 parser.add_argument('output', type=pathtype.Path(writable=True), nargs='?', default='/data/output',
                     help='Output directory to store the output')
-parser.add_argument('-t', '--temp', type=pathtype.Path(writable_or_creatable=True), nargs='?', default='/tmpdir',
-                    help='A folder to store temporary files')
-parser.add_argument('-r', '--recall', type=int, nargs='?',
-                    help='Recall value for the algorithm')
-parser.add_argument('-e', '--epochs', type=int, nargs='?',
-                    help='Number of epochs for the algorithm')
+parser.add_argument('-r', '--recall', type=float, nargs='?', default=1,
+                    help='Recall value used to select ground truth pairs')
+parser.add_argument('-m', '--method', type=str, default="DecisionTree",
+                    choices=["DecisionTree", "SVM", "RF", "LogReg", "LinReg", "NaiveBayes"],
+                    help='Method to use for the algorithm')
+parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(0, 4294967295),
+                    help='The random state used to initialize the algorithms and split dataset')
 
 args = parser.parse_args()
 
@@ -31,142 +29,91 @@ print("Hi, I'm Magellan entrypoint!")
 print("Input directory: ", os.listdir(args.input))
 print("Output directory: ", os.listdir(args.output))
 
-# Create a temporary directory to store intermediate files
-# FIXME: Could be removed if not needed (e.g. if the method does not require any intermediate files or data stored in memory)
-temp_input = os.path.join(args.temp, 'input')
-temp_output = os.path.join(args.temp, 'output')
+excl_attributes = ['_id', 'tableA_id', 'tableB_id', 'label']
+def add_catalog_information(df, tableA, tableB):
+    em.set_ltable(df, tableA)
+    em.set_rtable(df, tableB)
+    em.set_fk_ltable(df, excl_attributes[1])
+    em.set_fk_rtable(df, excl_attributes[2])
+    em.set_key(df, excl_attributes[0])
+
 
 # Step 1. Convert input data into the format expected by the method
-# FIXME: feel free to change the number of arguments, or store the data in variables and return them from the function
-transform_input(args.input, temp_input)
-print("Method input: ", os.listdir(temp_input))
+print("Method input: ", os.listdir(args.input))
+tableA, tableB, train, test = transform_input(args.input, args.recall, args.seed)
+
+em.set_key(tableA, 'id')
+em.set_key(tableB, 'id')
+
+add_catalog_information(train, tableA, tableB)
+add_catalog_information(test, tableA, tableB)
 
 # Step 2. Run the method
+t_start = time.perf_counter()
 
-def extract_feature_vectors(tableA, tableB, pairs, train_feature_subset=None):
-    start_time = time.time()
+# https://nbviewer.org/github/anhaidgroup/py_entitymatching/blob/master/notebooks/guides/step_wise_em_guides/Selecting%20the%20Best%20Learning%20Matcher.ipynb
 
-    logging.info('Number of tuples in A: ' + str(len(tableA)))
-    logging.info('Number of tuples in B: ' + str(len(tableB)))
-    logging.info('Number of tuples in A x B (i.e the cartesian product): ' + str(len(tableA) * len(tableB)))
+if args.method == "DecisionTree":
+    matcher = em.DTMatcher(name='DecisionTree', random_state=args.seed)
+elif args.method == "SVM":
+    matcher = em.SVMMatcher(name='SVM', random_state=args.seed)
+elif args.method == "RF":
+    matcher = em.RFMatcher(name='RF', random_state=args.seed)
+elif args.method == "LogReg":
+    matcher = em.LogRegMatcher(name='LogReg', random_state=args.seed)
+elif args.method == "LinReg":
+    matcher = em.LinRegMatcher(name='LinReg')
+elif args.method == "NaiveBayes":
+    matcher = em.NBMatcher(name='NaiveBayes')
+else:
+    raise ValueError("Invalid method")
 
-    if train_feature_subset is None:
-        feature_table = em.get_features_for_matching(tableA, tableB, validate_inferred_attr_types=False)
+# get features and remove those containing the id attribute
+F = em.get_features_for_matching(tableA, tableB, validate_inferred_attr_types=False)
+for num, feature in enumerate(F.feature_name):
+    if 'id' not in feature:
+        break
+F = F[num:]
 
-        # Remove ID based features
-        logging.info('All features {}'.format(feature_table['feature_name']))
-        train_feature_subset = feature_table[4:]
-        logging.info('Selected features {}'.format(train_feature_subset))
+# get feature vectors for the train and test set
+train_f_vectors = em.extract_feature_vecs(train, feature_table=F, attrs_after='label')
+test_f_vectors = em.extract_feature_vecs(test, feature_table=F, attrs_after='label')
 
-    # Generate features
-    feature_vectors = em.extract_feature_vecs(pairs, feature_table=train_feature_subset, attrs_after='label')
+# remove NaN values from the feature vectors by replacing them with the mean
+if not pd.notnull(train_f_vectors).to_numpy().all():
+    train_f_vectors = em.impute_table(train_f_vectors, missing_val=np.nan, exclude_attrs=excl_attributes, strategy='mean')
 
-    # Impute feature vectors with the mean of the column values.
-    feature_vectors = em.impute_table(feature_vectors,
-                                      exclude_attrs=['_id', 'table1.id', 'table2.id', 'label'],
-                                      strategy='mean', missing_val=np.NaN)
-    t = time.time() - start_time
-    return feature_vectors, t, train_feature_subset
+# fill NaN values in the test feature vectors with the same mean values
+fill_nan_values = train_f_vectors.mean()
+if not pd.notnull(test_f_vectors).to_numpy().all():
+    test_f_vectors.fillna(fill_nan_values, inplace=True)
 
+# Scale the feature vectors (better for some matching methods)
+feature_columns = []
+for column in train_f_vectors.columns:
+    if column not in excl_attributes:
+        feature_columns.append(column)
 
-def predict(train, test, time_train, time_test, result_file):
-    """
-    Predict results using four different classifiers of Magellan
-    and average the results
+X_train = train_f_vectors[feature_columns]
+scaler = StandardScaler().fit(X_train)
+X_train_scaled = scaler.transform(X_train)
+train_f_vectors[feature_columns] = X_train_scaled
 
-    :param train: Train data frame
-    :param test: Test data frame
-    :return:
-    """
-    # Create a set of ML-matchers
-    dt = em.DTMatcher(name='DecisionTree')
-    svm = em.SVMMatcher(name='SVM')
-    rf = em.RFMatcher(name='RF')
-    lg = em.LogRegMatcher(name='LogReg')
+X_test = test_f_vectors[feature_columns]
+X_test_scaled = scaler.transform(X_test)
+test_f_vectors[feature_columns] = X_test_scaled
 
-    # Train and eval on different classifiers
-    for clf, clf_name in [(dt, 'DecisionTree'), (svm, 'SVM'), (rf, 'RF'), (lg, 'LogReg')]:
-        start_time = time.time()
-        clf.fit(table=train,
-                exclude_attrs=['_id', 'table1.id', 'table2.id', 'label'],
-                target_attr='label')
-        time_train += time.time() - start_time
-        train_max_mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+# train a matcher
+# result = em.select_matcher([dt, svm, rf, lg, ln, nb], table=train_f_vectors, exclude_attrs=excl_attributes, k=5,
+#                             target_attr='label', metric_to_select_matcher='f1', random_state=RANDOMSTATE)
+# print(result['cv_stats'])
 
-        # Predict M
-        start_time = time.time()
-        predictions = clf.predict(table=test,
-                                  exclude_attrs=['_id', 'table1.id', 'table2.id', 'label'],
-                                  append=True, target_attr='predicted',
-                                  inplace=False)
+matcher.fit(table=train_f_vectors, exclude_attrs=excl_attributes, target_attr='label')
+prediction = matcher.predict(table=test_f_vectors, exclude_attrs=excl_attributes, append=True, return_probs=True,
+                             inplace=False, target_attr='prediction', probs_attr='probability')
 
-        # Evaluate the result
-        eval_result = em.eval_matches(predictions, 'label', 'predicted')
-        time_test += time.time() - start_time
-        test_max_mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-
-        em.print_eval_summary(eval_result)
-
-        p = eval_result['precision']
-        r = eval_result['recall']
-        if (p + r - p * r) == 0:
-            f_star = 0
-        else:
-            f_star = p * r / (p + r - p * r)
-        logging.info('---{} p{} r{} fst{}'.format(clf_name, p, r, f_star))
-
-        p = round(p * 100, 2)
-        r = round(r * 100, 2)
-        f_star = round(f_star * 100, 2)
-
-        file_exists = os.path.isfile(result_file)
-        with open(result_file, 'a') as results_file:
-            heading_list = ['method', 'train_time', 'test_time',
-                            'train_max_mem', 'test_max_mem', 'TP', 'FP', 'FN',
-                            'TN', 'Pre', 'Re', 'F1', 'Fstar']
-            writer = csv.DictWriter(results_file, fieldnames=heading_list)
-
-            if not file_exists:
-                writer.writeheader()
-
-            fcntl.flock(results_file, fcntl.LOCK_EX)
-            result_dict = {
-                'method': 'magellan' + clf_name,
-                'train_time': round(time_train, 2),
-                'test_time': round(time_test, 2),
-                'train_max_mem': train_max_mem,
-                'test_max_mem': test_max_mem,
-                'TP': eval_result['pred_pos_num'] - eval_result['false_pos_num'],
-                'FP': eval_result['false_pos_num'],
-                'FN': eval_result['false_neg_num'],
-                'TN': eval_result['pred_neg_num'] - eval_result['false_neg_num'],
-                'Pre': ('{prec:.2f}').format(prec=p),
-                'Re': ('{rec:.2f}').format(rec=r),
-                'F1': ('{f1:.2f}').format(f1=round(eval_result['f1'] * 100, 2)),
-                'Fstar': ('{fstar:.2f}').format(fstar=f_star)
-            }
-            writer.writerow(result_dict)
-            fcntl.flock(results_file, fcntl.LOCK_UN)
-
-
-tableA = em.read_csv_metadata(os.path.join(args.input, 'tableA.csv'), key='id')
-tableB = em.read_csv_metadata(os.path.join(args.input, 'tableB.csv'), key='id')
-
-trainPairs = em.read_csv_metadata(os.path.join(args.input, 'train.csv'), key='_id', ltable=tableA, rtable=tableB, fk_ltable='tableA_id', fk_rtable='tableB_id')
-testPairs = em.read_csv_metadata(os.path.join(args.input, 'test.csv'), key='_id', ltable=tableA, rtable=tableB, fk_ltable='tableA_id', fk_rtable='tableB_id')
-
-# Generate training feature vectors using full data set
-train, t_train, train_feature_subset = extract_feature_vectors(tableA, tableB, trainPairs)
-
-# Generate testing feature vectors using only the specified link
-test, t_test, _ = extract_feature_vectors(tableA, tableB, testPairs, train_feature_subset)
-
-result_file = os.path.join(temp_output, 'results.csv')
-
-predict(train, test, t_train, t_test, result_file)
-print("Method output: ", os.listdir(temp_output))
+t_stop = time.perf_counter()
 
 # Step 3. Convert the output into a common format
-# FIXME: feel free to change the number of arguments, but make sure to persist the data to the output directory
-transform_output(temp_output, args.output)
+transform_output(prediction, t_stop - t_start, args.output)
 print("Final output: ", os.listdir(args.output))

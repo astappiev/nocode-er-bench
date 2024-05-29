@@ -15,12 +15,12 @@ The image should contain the source code of the method and input + output transf
 
 You can directly execute the docker image as following:
 ```bash
-docker run --rm --mount type=tmpfs,destination=/tmpdir -v .:/data magellan
+docker run --rm -v .:/data magellan
 ```
 This will assume that you have the input dataset in the current directory,
 it will mount it as `/data` and will output the results in the `output` subdirectory.
 
 You can override the input and output directories by providing them as arguments to the docker image:
 ```bash
-docker run --mount type=tmpfs,destination=/tmpdir -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/output magellan /data/input /data/output
+docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/output magellan /data/input /data/output
 ```
