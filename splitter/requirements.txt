@@ -1,2 +1,8 @@
 pathtype
+fasttext
 pandas
+pathlib
+scipy
+scikit-learn
+torch
+torchtext
