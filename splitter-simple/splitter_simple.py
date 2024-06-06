@@ -80,18 +80,14 @@ if __name__ == "__main__":
     if args.output is None:
         args.output = args.input
 
-    print("Hi, I'm simple splitter, I'm doing random split of the input datasets into train and test sets")
+    print("Hi, I'm simple splitter, I'm doing random split of the input datasets into train and test sets.")
     tableA_df = pd.read_csv(path.join(args.input, 'tableA.csv'), encoding_errors='replace')
     tableB_df = pd.read_csv(path.join(args.input, 'tableB.csv'), encoding_errors='replace')
     matches_df = pd.read_csv(path.join(args.input, 'matches.csv'), encoding_errors='replace')
-    print("Table A: ", tableA_df.shape)
-    print("Table B: ", tableB_df.shape)
-    print("Matches: ", matches_df.shape)
+    print("Input tables are:", "A", tableA_df.shape, "B", tableB_df.shape, "Matches", matches_df.shape)
 
     train, test = split_input(tableA_df, tableB_df, matches_df, recall=args.recall, seed=random.randint(0, 4294967295))
-    print("Done!")
-    print("Test set size: ", test.shape[0])
-    print("Train set size: ", train.shape[0])
+    print("Done! Train size: {}, test size: {}.".format(train.shape[0], test.shape[0]))
 
     train.to_csv(path.join(args.output, "train.csv"), index=False)
     test.to_csv(path.join(args.output, "test.csv"), index=False)

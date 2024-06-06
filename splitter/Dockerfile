@@ -16,5 +16,5 @@ COPY *.py .
 
 # This allows to run the container as `docker run --rm <yourImageName> <args>`
 ENV PYTHONPATH="${PYTHONPATH}:/workspace/DeepBlocker"
-ENTRYPOINT ["python", "-u", "entrypoint.py"]
+ENTRYPOINT ["python", "-u", "splitter.py"]
 CMD []

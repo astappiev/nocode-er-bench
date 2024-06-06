@@ -6,3 +6,7 @@
 node_modules
 test
 embedding
+
+train.csv
+test.csv
+val.csv
