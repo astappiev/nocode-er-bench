@@ -35,18 +35,18 @@ def generate_candidates(tableA_df, tableB_df, matches_df, seed):
         rng = np.random.default_rng(seed)
         num_neg_pairs = 0
         skip_counter = 0
-        neg_ids = []
+        neg_ids = set([])
         while num_neg_pairs < NUM_NEG_PAIRS:
             assert skip_counter < NUM_NEG_PAIRS * 1.5, "Too many pairs skipped, please check the number of negatives requested"
             a_id = rng.integers(0, tableA_df.shape[0])
             b_id = rng.integers(0, tableB_df.shape[0])
 
-            if (a_id, b_id) in matches_tuples:
+            if (a_id, b_id) in matches_tuples or (a_id, b_id) in neg_ids:
                 skip_counter += 1
                 continue
-            neg_ids.append([a_id, b_id])
+            neg_ids.add((a_id, b_id))
             num_neg_pairs += 1
-        neg_ids = np.array(neg_ids)
+        neg_ids = np.array(list(neg_ids))
 
     neg_pairs = pd.concat([
         (cand_tableA.iloc[neg_ids[:, 0]]).reset_index(drop=True),
@@ -78,7 +78,7 @@ def transform_input(source_dir, recall, seed):
     # TODO: reduce GT based on recall value
 
     pairs = generate_candidates(tableA_df, tableB_df, matches_df, seed)
-    train, test = train_test_split(pairs, train_size=0.7, random_state=seed, shuffle=True, stratify=pairs['label'])
+    train, test = train_test_split(pairs, train_size=recall, random_state=seed, shuffle=True, stratify=pairs['label'])
     return tableA_df, tableB_df, train, test
 
 
