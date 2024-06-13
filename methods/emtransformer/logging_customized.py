@@ -7,8 +7,7 @@ def setup_logging():
                         format='%(message)s',
                         datefmt="%H:%M:%S",
                         stream=sys.stdout,
-                        #filename='log_file_name.log',
+                        # filename='log_file_name.log',
                         )
 
     logging.getLogger('bert-classifier-entity-matching')
-    
