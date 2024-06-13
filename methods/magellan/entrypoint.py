@@ -7,7 +7,7 @@ import pathtype
 import pandas as pd
 import numpy as np
 import py_entitymatching as em
-from transform import transform_input, transform_output
+from transform import transform_output
 from sklearn.preprocessing import StandardScaler
 
 parser = argparse.ArgumentParser(description='Benchmark a dataset with a method')
@@ -15,8 +15,6 @@ parser.add_argument('input', type=pathtype.Path(readable=True), nargs='?', defau
                     help='Input directory containing the dataset')
 parser.add_argument('output', type=pathtype.Path(writable=True), nargs='?', default='/data/output',
                     help='Output directory to store the output')
-parser.add_argument('-r', '--recall', type=float, nargs='?', default=1,
-                    help='Recall value used to select ground truth pairs')
 parser.add_argument('-m', '--method', type=str, default="DecisionTree",
                     choices=["DecisionTree", "SVM", "RF", "LogReg", "LinReg", "NaiveBayes"],
                     help='Method to use for the algorithm')
@@ -40,7 +38,10 @@ def add_catalog_information(df, tableA, tableB):
 
 # Step 1. Convert input data into the format expected by the method
 print("Method input: ", os.listdir(args.input))
-tableA, tableB, train, test = transform_input(args.input, args.recall, args.seed)
+tableA = pd.read_csv(os.path.join(args.input, 'tableA.csv'), encoding_errors='replace')
+tableB = pd.read_csv(os.path.join(args.input, 'tableB.csv'), encoding_errors='replace')
+train = pd.read_csv(os.path.join(args.input, 'train.csv'), encoding_errors='replace')
+test = pd.read_csv(os.path.join(args.input, 'test.csv'), encoding_errors='replace')
 
 em.set_key(tableA, 'id')
 em.set_key(tableB, 'id')
