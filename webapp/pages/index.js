@@ -51,7 +51,7 @@ export default function Home() {
         setDatasets(data);
         setLoading(!algorithms || !datasets);
       });
-  }, [])
+  }, [algorithms, datasets, selectedScenario])
 
   const onSubmit = (e) => {
     setDisabled(true);
