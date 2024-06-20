@@ -1,0 +1,4 @@
+pathtype
+scikit-learn
+deepmatcher==0.1.2.post2
+pandas

@@ -4,8 +4,6 @@ RUN apt-get update --allow-insecure-repositories && \
     apt-get install -y build-essential && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir deepmatcher scikit-learn
-
 WORKDIR /workspace
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

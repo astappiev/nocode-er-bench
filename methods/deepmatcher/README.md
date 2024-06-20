@@ -1,14 +1,18 @@
-To test the **DeepMatcher** docker, use the following commands:
+# DeepMatcher
 
-* eval "$(conda shell.bash hook)"
-* conda activate deepmatcher
+https://github.com/anhaidgroup/deepmatcher
+https://github.com/nishadi/deepmatcher-sample
 
-* git clone https://github.com/anhaidgroup/deepmatcher.git
-* cd deepmatcher/examples/sample_data
-* mv amz_goog_train.csv train.csv
-* mv amz_goog_test.csv test.csv
-* mv amz_goog_validation.csv val.csv
+## How to use
 
-* git clone https://github.com/nishadi/deepmatcher-sample.git
-* cd deepmatcher-sample
-* python run.py /workspace/deepmatcher/examples/sample_data sample
+You can directly execute the docker image as following:
+```bash
+docker run --rm -v .:/data deepmatcher
+```
+This will assume that you have the input dataset in the current directory,
+it will mount it as `/data` and will output the results in the `output` subdirectory.
+
+You can override the input and output directories by providing them as arguments to the docker image:
+```bash
+docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/output deepmatcher /data/input /data/output
+```

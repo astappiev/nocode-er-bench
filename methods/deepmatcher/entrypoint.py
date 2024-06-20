@@ -6,7 +6,6 @@ import pathtype
 
 import pandas as pd
 import deepmatcher as dm
-from HierMatcher import *
 from transform import transform_output
 
 parser = argparse.ArgumentParser(description='Benchmark a dataset with a method')
@@ -19,7 +18,7 @@ parser.add_argument('embedding', type=pathtype.Path(readable=True), nargs='?', d
 
 args = parser.parse_args()
 
-print("Hi, I'm HierMatcher entrypoint!")
+print("Hi, I'm DeepMatcher entrypoint!")
 print("Input directory: ", os.listdir(args.input))
 print("Output directory: ", os.listdir(args.output))
 
@@ -43,14 +42,10 @@ datasets = dm.data.process(path=args.output,
 train, test = datasets[0], datasets[1] if len(datasets) >= 2 else None
 
 # Step 2. Run the method
-model = HierMatcher(hidden_size=150, embedding_length=300, manualSeed=2)
+model = dm.MatchingModel()
 
 start_time = time.time()
-model.run_train(train, test, epochs=15,
-                batch_size=64,
-                label_smoothing=0.05,
-                pos_weight=1.5,
-                best_save_path='best_model.pth')
+model.run_train(train, test, epochs=15, best_save_path='best_model.pth')
 train_time = time.time() - start_time
 train_max_mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
