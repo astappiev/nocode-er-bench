@@ -26,10 +26,11 @@ def join_columns (table, columns_to_join=None, separator=' ', prefixes=['tableA_
         print(columns)
         
         red_table = table.loc[:,columns]
+        red_table = red_table.fillna('')
         red_table = red_table.astype(str)
         
         part_table = red_table.aggregate(separator.join, axis=1)
-        part_table = part_table.map(lambda x: x.replace('nan', ''))
+        #part_table = part_table.map(lambda x: x.replace('nan', ''))
         part_table.rename(prefix+'AgValue', inplace=True)
         
         agg_table = pd.concat([agg_table,table[prefix+'id'],part_table], axis=1)

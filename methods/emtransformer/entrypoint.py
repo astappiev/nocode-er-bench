@@ -48,7 +48,8 @@ print("Output directory: ", os.listdir(args.output))
 print("Method input: ", os.listdir(args.input))
 prefix_1 = 'tableA_'
 prefix_2 = 'tableB_'
-train_df, test_df = transform_input(args.input, args.recall, seed=args.seed)
+columns_to_join = None
+train_df, test_df = transform_input(args.input, columns_to_join, ' ', [prefix_1, prefix_2])
 print(test_df.columns)
 
 
