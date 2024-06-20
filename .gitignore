@@ -6,3 +6,5 @@
 node_modules
 test
 embedding
+output
+__pycache__
