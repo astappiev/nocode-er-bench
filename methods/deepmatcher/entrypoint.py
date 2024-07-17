@@ -36,7 +36,7 @@ datasets = dm.data.process(path=args.output,
                            label_attr='label',
                            left_prefix='tableA_',
                            right_prefix='tableB_',
-                           #cache=None,
+                           cache=None,
                            embeddings_cache_path=args.embedding)
 
 train, test = datasets[0], datasets[1] if len(datasets) >= 2 else None

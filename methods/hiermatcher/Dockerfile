@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:1.10.0-cuda11.3-cudnn8-devel
+FROM pytorch/pytorch:1.10.0-cuda11.3-cudnn8-runtime
 
 RUN apt-get update --allow-insecure-repositories && \
     apt-get install -y build-essential && \
@@ -12,6 +12,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # ADD https://zenodo.org/record/6466387/files/wiki.en.bin /workspace/embedding
 
 COPY *.py .
+
+# fix issue https://github.com/anhaidgroup/deepmatcher/issues/3
+RUN sed -i 's/return getattr(self, name)/return self._modules[name]/' /opt/conda/lib/python3.7/site-packages/deepmatcher/models/modules.py
 
 # This allows to run the container as `docker run --rm <yourImageName> <args>`
 ENTRYPOINT ["python", "-u", "./entrypoint.py"]
