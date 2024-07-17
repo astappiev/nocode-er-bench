@@ -1,11 +1,15 @@
-FROM pytorch/pytorch:1.7.1-cuda11.0-cudnn8-runtime
-RUN conda install transformers  pandas tensorboardX scikit-learn --yes
-RUN pip install pytorch_transformers
-RUN apt-get update && apt-get install -y git
-RUN git clone https://github.com/gpapadis/DLMatchers.git
+FROM pytorch/pytorch:1.10.0-cuda11.3-cudnn8-runtime
 
-# Install worker script
+RUN apt-get update --allow-insecure-repositories && \
+    apt-get install -y build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /workspace
-COPY worker.py .
-RUN pip install --no-cache-dir bullmq
-CMD ["python3", "./worker.py"]
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY *.py .
+
+# This allows to run the container as `docker run --rm <yourImageName> <args>`
+ENTRYPOINT ["python", "-u", "./entrypoint.py"]
+CMD []

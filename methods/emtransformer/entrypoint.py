@@ -22,10 +22,10 @@ parser.add_argument('-r', '--recall', type=float, nargs='?', default=0.8,
 parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(0, 4294967295),
                     help='The random state used to initialize the algorithms and split dataset')
 
-parser.add_argument('--model', default='bert', type=str)
-parser.add_argument('--max_seq_length', default=128, type=int)
-parser.add_argument('--train_batch_size', default=8, type=int)
-parser.add_argument('--num_epochs', default=1.0, type=float)
+parser.add_argument('--model', default='bert', type=str)  # roberta
+parser.add_argument('--max_seq_length', default=128, type=int)  # 180
+parser.add_argument('--train_batch_size', default=8, type=int)  # 16
+parser.add_argument('--num_epochs', default=1.0, type=float)  # 15.0
 
 args = parser.parse_args()
 
