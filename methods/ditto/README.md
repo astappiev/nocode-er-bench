@@ -1,4 +1,20 @@
-To test the **DITTO** docker, use the following commands:
+# DITTO
 
-*  cd /workspace/ditto
-*  CUDA_VISIBLE_DEVICES=0 python train_ditto.py  --task Structured/Beer --batch_size 64  --max_len 256  --lr 3e-5  --n_epochs ${EPOCHS} --lm roberta  --fp16 --da del --dk product  --summarize
+https://github.com/nishadi/ditto
+
+## How to use
+
+You can directly execute the docker image as following:
+
+```bash
+docker run --rm -v .:/data ditto
+```
+
+This will assume that you have the input dataset in the current directory,
+it will mount it as `/data` and will output the results in the `output` subdirectory.
+
+You can override the input and output directories by providing them as arguments to the docker image:
+
+```bash
+docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/output ditto /data/input /data/output
+```

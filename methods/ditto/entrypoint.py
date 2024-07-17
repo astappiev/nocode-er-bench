@@ -1,21 +1,11 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jun 20 10:59:51 2024
-
-@author: franziska
-"""
-
 import os
 import argparse
 import random
-import json
 import sys
 import torch
 import numpy as np
 from collections import namedtuple
 import time
-from tqdm import tqdm
 
 
 from transform import transform_input_old, transform_output
@@ -63,7 +53,7 @@ hyperparameters = namedtuple('hyperparameters', ['lm', #language Model
                                                  'n_epochs', #number of epochs
                                                  'batch_size',
                                                  'max_len', #max number of tokens as input for language model
-                                                 'lr', #learning rate 
+                                                 'lr', #learning rate
                                                  'save_model',
                                                  'logdir',
                                                  'fp16', #train with half precision
@@ -72,7 +62,7 @@ hyperparameters = namedtuple('hyperparameters', ['lm', #language Model
                                                  'dk', #domain knowledge
                                                  'summarize', #summarize to max_len
                                                  'size',#dataset size
-                                                 'run_id']) 
+                                                 'run_id'])
 
 hp = hyperparameters(lm = args.model,
                      n_epochs = args.epochs,
@@ -88,7 +78,7 @@ hp = hyperparameters(lm = args.model,
                      summarize = True,
                      size = None,
                      run_id = args.run_id)
-                     
+
 
 
 
