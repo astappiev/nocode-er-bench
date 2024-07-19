@@ -1,6 +1,8 @@
 # DITTO
 
 https://github.com/nishadi/ditto
+entrypoint.py based on train_ditto.py and matcher.py
+
 
 ## How to use
 

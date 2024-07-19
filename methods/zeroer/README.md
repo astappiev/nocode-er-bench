@@ -1,6 +1,7 @@
 # ZeroER
 
 https://github.com/nishadi/zeroer
+entrypoint.py based on zeroer.py
 
 ## How to use
 

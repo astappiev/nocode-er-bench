@@ -1,6 +1,7 @@
 # EMTransformer
 
 https://github.com/gpapadis/DLMatchers/tree/main/EMTransformer
+entrypoint.py based on run_all.py
 
 ## How to use
 
