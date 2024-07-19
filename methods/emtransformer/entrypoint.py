@@ -73,11 +73,8 @@ else:  # SBERT Models
 
 print("initialized {}-model".format(args.model))
 
-for i, row in train_df.iterrows():
-    print(row)
-    break
 
-train_examples = [InputExample(row['_id'], row[prefix_1 + 'AgValue'], row[prefix_2 + 'AgValue'], row['label']) for
+train_examples = [InputExample(i, row[prefix_1 + 'AgValue'], row[prefix_2 + 'AgValue'], row['label']) for
                   i, row in train_df.iterrows()]
 
 training_data_loader = load_data(train_examples,
@@ -113,7 +110,7 @@ t2 = time.perf_counter()
 training_time = t2 - t1
 
 # Testing
-test_examples = [InputExample(row['_id'], row[prefix_1 + 'AgValue'], row[prefix_2 + 'AgValue'], row['label']) for i, row
+test_examples = [InputExample(i, row[prefix_1 + 'AgValue'], row[prefix_2 + 'AgValue'], row['label']) for i, row
                  in test_df.iterrows()]
 
 test_data_loader = load_data(test_examples,

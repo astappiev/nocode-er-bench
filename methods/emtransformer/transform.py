@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def join_columns(table, columns_to_join=None, separator=' ', prefixes=['tableA_', 'tableB_']):
-    agg_table = table['_id']
+    agg_table = pd.DataFrame()
     for prefix in prefixes:
         print(columns_to_join)
         if columns_to_join == None:
