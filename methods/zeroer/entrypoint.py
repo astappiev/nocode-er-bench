@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jul 16 11:10:14 2024
-
-@author: franziska
-adopted from: https://github.com/nishadi/zeroer/blob/main/zeroer.py
-"""
 import argparse
 #import pathtype
 import random
