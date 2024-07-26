@@ -11,6 +11,7 @@ from prediction import predict
 from torch_initializer import initialize_gpu_seed
 from training import train
 from transform import transform_input, transform_output
+import torch
 
 parser = argparse.ArgumentParser(description='Benchmark a dataset with a method')
 parser.add_argument('input', nargs='?', default='datasets/d2_abt_buy',
@@ -38,11 +39,11 @@ print("Method input: ", os.listdir(args.input))
 prefix_1 = 'tableA_'
 prefix_2 = 'tableB_'
 columns_to_join = None
-train_df, test_df = transform_input(args.input, columns_to_join, ' ', [prefix_1, prefix_2])
-print(test_df.columns)
+test_df, train_df = transform_input(args.input, columns_to_join, ' ', [prefix_1, prefix_2])
+print(test_df.columns, train_df.columns)
 
-device, n_gpu = initialize_gpu_seed(args.seed)
-# device, n_gpu = torch.device("cpu"), 0
+#device, n_gpu = initialize_gpu_seed(args.seed)
+device, n_gpu = torch.device("cpu"), 0
 
 label_list = [0, 1]
 print("training with {} labels: {}".format(len(label_list), label_list))
@@ -133,10 +134,7 @@ testing_time = t2 - t1
 keys = ['precision', 'recall', 'fbeta_score', 'support']
 prfs = {f'class_{no}': {key: float(prfs[nok][no]) for nok, key in enumerate(keys)} for no in range(2)}
 
-print(simple_accuracy)
-print(f1)
 print(classification_report)
-print(prfs)
-print(predictions)
+
 
 transform_output(predictions, test_df, training_time + testing_time, args.output)

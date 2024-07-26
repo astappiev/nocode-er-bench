@@ -57,27 +57,31 @@ def transform_output(predictions_df, test_table, runtime, dest_dir):
 
     # get the actual candidates (entity pairs with prediction 1)
     candidate_ids = predictions_df[predictions_df['predictions'] == 1]
-
     candidate_table = test_table.iloc[candidate_ids.index]
     # save candidate pair IDs to predictions.csv
     candidate_table[['tableA_id', 'tableB_id']].to_csv(os.path.join(dest_dir, 'predictions.csv'), index=False)
-
-    # calculate evaluation metrics
-    num_candidates = candidate_table.shape[0]
-    true_positives = candidate_table['label'].sum()
-    print(candidate_table[candidate_table['label'] == 1])
-
-    ground_truth = test_table['label'].sum()
-
-    recall = true_positives / ground_truth
-    precision = true_positives / num_candidates
-    f1 = 2 * precision * recall / (precision + recall)
+    
+    if candidate_table.shape[0] > 0:
+        # calculate evaluation metrics
+        num_candidates = candidate_table.shape[0]
+        true_positives = candidate_table['label'].sum()
+        print(candidate_table[candidate_table['label'] == 1])
+    
+        ground_truth = test_table['label'].sum()
+    
+        recall = true_positives / ground_truth
+        precision = true_positives / num_candidates
+        f1 = 2 * precision * recall / (precision + recall)
+    else:
+        f1 = 0
+        precision = 0
+        recall = 0
 
     # save evaluation metrics to metrics.csv
     pd.DataFrame({
         'f1': [f1],
-        'precision': [true_positives / num_candidates],
-        'recall': [true_positives / ground_truth],
+        'precision': [precision],
+        'recall': [recall],
         'time': [runtime],
     }).to_csv(os.path.join(dest_dir, 'metrics.csv'), index=False)
     return None
