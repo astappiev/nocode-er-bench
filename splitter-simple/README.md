@@ -30,5 +30,5 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 
 ```bash
 apptainer build ../apptainer/splitter_simple.sif container.def
-apptainer run ../apptainer/splitter_simple.sif ../datasets/d1_fodors_zagats/ ../output/
+apptainer run ~/nocode-er-bench/apptainer/splitter_simple.sif ~/nocode-er-bench/datasets/d1_fodors_zagats/ ~/nocode-er-bench/output/
 ```

@@ -33,11 +33,12 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 
 ```bash
 apptainer build ../apptainer/splitter.sif container.def
-apptainer run ../apptainer/splitter.sif ../datasets/d1_fodors_zagats/ ../output/ ../embedding/
+apptainer run ~/nocode-er-bench/apptainer/splitter.sif ~/nocode-er-bench/datasets/d1_fodors_zagats/ ~/nocode-er-bench/output/ ~/nocode-er-bench/embedding/
 ```
 
 ## Cuda error
 
+```bash
 ❯ time apptainer run ../apptainer/splitter.sif ../datasets/d1_fodors_zagats/ ../output/ ../embedding/
 Hi, I'm DeepBlocker splitter, I'm doing random split of the input datasets into train and test sets.
 Input tables are: A (533, 7) B (331, 7) Matches (110, 2)
@@ -69,3 +70,4 @@ Traceback (most recent call last):
   File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 114, in forward
     return F.linear(input, self.weight, self.bias)
 RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu! (when checking argument for argument mat1 in method wrapper_addmm)
+```

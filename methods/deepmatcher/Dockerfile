@@ -11,7 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Download the pre-trained model on English Wikipedia
 # ADD https://zenodo.org/record/6466387/files/wiki.en.bin /workspace/embedding
 
-COPY *.py .
+COPY entrypoint.py .
+COPY transform.py .
 
 # fix issue https://github.com/anhaidgroup/deepmatcher/issues/3
 RUN sed -i 's/return getattr(self, name)/return self._modules[name]/' /opt/conda/lib/python3.7/site-packages/deepmatcher/models/modules.py

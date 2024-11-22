@@ -57,7 +57,7 @@ def generate_candidates(tableA_df, tableB_df, matches_df, neg_pairs_limit=10000,
 
     # join the matching and non-matching pairs to a large table
     pairs = pd.concat([pos_pairs, neg_pairs]).reset_index(drop=True)
-    pairs['_id'] = np.arange(pairs.shape[0])
+    # pairs['_id'] = np.arange(pairs.shape[0])
     return pairs
 
 
