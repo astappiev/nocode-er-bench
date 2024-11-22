@@ -7,6 +7,10 @@ node_modules
 test
 embedding
 
+/apptainer
+/input
+/output
+
 train.csv
 test.csv
 val.csv

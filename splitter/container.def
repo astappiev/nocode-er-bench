@@ -1,0 +1,29 @@
+Bootstrap: docker
+From: pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
+
+%labels
+    Author Oleh Astappiev, Franziska Neuhof
+    Version v0.0.1
+
+%help
+    Splits the dataset into training, validation, and testing sets using DeepBlocker.
+    See `-h` for more information.
+
+%files
+    requirements.txt /srv
+    splitter.py /srv
+    DeepBlocker /srv
+
+%post
+    apt-get update --allow-insecure-repositories && \
+        apt-get install -y build-essential && \
+        rm -rf /var/lib/apt/lists/*
+
+    cd /srv
+    pip install --no-cache-dir -r requirements.txt
+
+%environment
+    export PYTHONPATH="${PYTHONPATH}:/srv/DeepBlocker"
+
+%runscript
+    exec python -u /srv/splitter.py  "$@"
