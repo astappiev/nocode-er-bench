@@ -1,4 +1,5 @@
 import argparse
+import sys
 from os import path
 import random
 import pathtype
@@ -15,8 +16,8 @@ def generate_candidates(tableA_df, tableB_df, matches_df, neg_pairs_limit=10000,
 
     # create table of matching pairs, which contains all attributes
     pos_pairs = pd.concat([
-        (cand_tableA.iloc[matches_df['tableA_id']]).reset_index(drop=True),
-        (cand_tableB.iloc[matches_df['tableB_id']]).reset_index(drop=True)
+        (cand_tableA.loc[matches_df['tableA_id']]).reset_index(drop=True),
+        (cand_tableB.loc[matches_df['tableB_id']]).reset_index(drop=True)
     ], axis=1)
 
     assert matches_df.equals(pos_pairs.loc[:, ['tableA_id', 'tableB_id']]), \
@@ -35,8 +36,7 @@ def generate_candidates(tableA_df, tableB_df, matches_df, neg_pairs_limit=10000,
         skip_counter = 0
         neg_ids = set([])
         while num_neg_pairs < neg_pairs_limit:
-            assert skip_counter < neg_pairs_limit * 1.5, \
-                "Too many pairs skipped, please check the number of negatives requested"
+            assert skip_counter < neg_pairs_limit * 1.5, "Too many pairs skipped, please check the number of negatives requested"
             a_id = rng.integers(0, tableA_df.shape[0])
             b_id = rng.integers(0, tableB_df.shape[0])
 
@@ -86,6 +86,20 @@ if __name__ == "__main__":
     matches_df = pd.read_csv(path.join(args.input, 'matches.csv'), encoding_errors='replace')
     print("Input tables are:", "A", tableA_df.shape, "B", tableB_df.shape, "Matches", matches_df.shape)
 
+    tableA_df.set_index('id', inplace=True, drop=False)
+    tableB_df.set_index('id', inplace=True, drop=False)
+
+    # verify that all ids of matches are in the range of the tables
+    for tableA_id in matches_df['tableA_id']:
+        if tableA_id not in tableA_df['id']:
+            print("Error: id", tableA_id, "from matches.csv is not in tableA.csv")
+            sys.exit(1)
+    for tableB_id in matches_df['tableB_id']:
+        if tableB_id not in tableB_df['id']:
+            print("Error: id", tableB_id, "from matches.csv is not in tableB.csv")
+            sys.exit(1)
+
+    # split the input datasets
     train, test = split_input(tableA_df, tableB_df, matches_df, recall=args.recall, seed=random.randint(0, 4294967295))
     print("Done! Train size: {}, test size: {}.".format(train.shape[0], test.shape[0]))
 
