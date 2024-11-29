@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState} from 'react';
 import {DataTable} from 'primereact/datatable';
 import {Column} from 'primereact/column';
 import {Button} from 'primereact/button';
@@ -7,10 +7,19 @@ import {InputNumber} from 'primereact/inputnumber';
 import {FileUpload} from 'primereact/fileupload';
 import {Dropdown} from 'primereact/dropdown';
 import {InputText} from "primereact/inputtext";
-import {ProgressBar} from "primereact/progressbar";
-import {ProgressSpinner} from "primereact/progressspinner";
 
-export default function Home() {
+import prisma from "../prisma/client";
+
+export const getServerSideProps = async ({req}) => {
+  const algorithms = await prisma.algorithm.findMany();
+  const datasets = await prisma.dataset.findMany();
+
+  return {
+    props: {datasets, algorithms}
+  }
+}
+
+export default function Home({datasets, algorithms}) {
   const scenarios = [
     {code: 'filter', name: 'Filtering'},
     {code: 'verify', name: 'Verification'},
@@ -18,87 +27,51 @@ export default function Home() {
   ];
 
   // data
-  const [algorithms, setAlgorithms] = useState(null);
-  const [datasets, setDatasets] = useState(null);
-  const [results, setResults] = useState({});
+  const [results, setResults] = useState([]);
+  const [job, setJob] = useState(null);
 
   // fields
   const [selectedScenario, setSelectedScenario] = useState(scenarios[0]);
-  const [selectedDataset, setSelectedDataset] = useState(null);
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
+  const [selectedDataset, setSelectedDataset] = useState(datasets[0]);
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState(algorithms.find(algo => algo.scenarios.includes(selectedScenario.code)));
   const [recall, setRecall] = useState(0.85);
   const [epochs, setEpochs] = useState(10);
   const [email, setEmail] = useState('');
 
   // state
-  const [isLoading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
   const [formDisabled, setDisabled] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [showResults, setShowResults] = useState(false);
-
-  useEffect(() => {
-    fetch('/api/algorithms')
-      .then((res) => res.json())
-      .then((data) => {
-        setAlgorithms(data);
-        setSelectedAlgorithm(data.find(algo => algo.scenarios.includes(selectedScenario.code)));
-        setLoading(!algorithms || !datasets);
-      });
-
-    fetch('/api/datasets')
-      .then((res) => res.json())
-      .then((data) => {
-        setDatasets(data);
-        setLoading(!algorithms || !datasets);
-      });
-  }, [algorithms, datasets, selectedScenario])
 
   const onSubmit = (e) => {
     setDisabled(true);
-    setProgress(2);
 
-    const fakeWaitFor = 57_000; // ms
-    setTimeout(() => {
-      setProgress(5);
-    }, fakeWaitFor * 0.1);
-
-    setTimeout(() => {
-      setProgress(10);
-    }, fakeWaitFor * 0.15);
-
-    setTimeout(() => {
-      setProgress(20);
-    }, fakeWaitFor * 0.3);
-
-    setTimeout(() => {
-      setProgress(80);
-    }, fakeWaitFor * 0.85);
-
-    setTimeout(() => {
-      setProgress(95);
-
-      fetch('/api/submit', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          scenario: selectedScenario.code,
-          dataset: selectedDataset.code,
-          algorithm: selectedAlgorithm.code,
-          recall: recall,
-          epochs: epochs,
-          email: email,
-        })
+    fetch('/api/submit', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        scenario: selectedScenario.code,
+        datasetId: selectedDataset.id,
+        algorithmId: selectedAlgorithm.id,
+        recall: recall,
+        epochs: epochs,
+        notifyEmail: email,
       })
-        .then((res) => res.json())
-        .then((data) => {
+    })
+      .then((res) => {
+        console.log(res);
+        return res.json();
+      })
+      .then((data) => {
+        console.log(data);
+        if (data.status === 201) {
+          setJob(data.job);
+        } else {
           setResults(data);
-          setProgress(100);
-          setShowResults(true);
-        });
-    }, fakeWaitFor);
+        }
+      });
   }
 
   if (isLoading) return <p>Loading...</p>
@@ -169,7 +142,7 @@ export default function Home() {
           <small id="algorithm-help">Which algorithm / model to use</small>
         </div>
 
-        <div className={(selectedAlgorithm.params.includes('recall') ? null : "hidden")}>
+        <div className={(selectedAlgorithm != null && selectedAlgorithm.params.includes('recall') ? null : "hidden")}>
           <div className="flex flex-column gap-2 mb-3">
             <label htmlFor="recall">Recall</label>
             <InputNumber id="recall" aria-describedby="recall-help" className="w-full"
@@ -181,7 +154,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className={(selectedAlgorithm.params.includes('epochs') ? null : "hidden")}>
+        <div className={(selectedAlgorithm != null && selectedAlgorithm.params.includes('epochs') ? null : "hidden")}>
           <div className="flex flex-column gap-2 mb-3">
             <label htmlFor="epochs">Epochs</label>
             <InputNumber id="epochs" aria-describedby="epochs-help" className="w-full"
@@ -210,12 +183,7 @@ export default function Home() {
       </div>
     </div>
 
-    <div className={"grid mt-4 " + (progress > 0 && progress < 100 ? null : "hidden")}>
-      <ProgressBar value={progress} className="w-full"></ProgressBar>
-      <ProgressSpinner className="mt-6 mx-auto"/>
-    </div>
-
-    <div className={"mt-4 " + (showResults ? null : "hidden")}>
+    <div className={"mt-4 " + (results.length ? null : "hidden")}>
       <div className="col">
         <h2>Results</h2>
         <DataTable value={results} tableStyle={{minWidth: '50rem'}}>

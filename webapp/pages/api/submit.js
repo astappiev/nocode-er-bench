@@ -1,58 +1,45 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
-export default function handler(req, res) {
-  const results = {
-    'deepmatcher': {
-      'D1': {
-        'f1': 98.65,
-      },
-    },
-    'ditto': {
-      'D1': {
-        'f1': 51.46,
-      }
-    },
-    'emtransformer': {
-      'D1': {
-        'f1': 98.99,
-      }
-    },
-    'gnem': {
-      'D1': {
-        'f1': 98.21,
-      }
-    },
-    'hiermatcher': {
-      'D1': {
-        'f1': 98.21,
-      }
-    },
-    'magellan': {
-      'D1': {
-        'f1': 97.65,
-      }
-    },
-    'zeroer': {
-      'D1': {
-        'f1': 98.80,
-      }
-    },
-  };
+import prisma from "../../prisma/client";
 
+export default async function handler(req, res) {
   if (req.method === 'POST') {
-    if (!req.body.dataset || !req.body.algorithm) {
+    if (!req.body.datasetId || !req.body.algorithmId) {
       res.status(400)
     }
 
-    let theResults = results[req.body.algorithm][req.body.dataset];
+    if (!req.body.force) {
+      const existingResults = await prisma.result.findMany({
+        where: {
+          job: {
+            status: 'completed',
+            scenario: req.body.scenario,
+            datasetId: req.body.datasetId,
+            algorithmId: req.body.algorithmId,
+            recall: req.body.recall,
+            epochs: req.body.epochs,
+          }
+        }
+      });
 
-    if (!theResults) {
-      theResults = {
-        'f1': 50.00,
+      if (existingResults.length > 0) {
+        return res.status(200).json(existingResults);
       }
     }
 
-    res.status(200).json(Object.entries(theResults).map(([name, value]) => ({name, value})))
+    await prisma.job.create({
+      data: {
+        status: 'pending',
+        scenario: req.body.scenario,
+        datasetId: req.body.datasetId,
+        algorithmId: req.body.algorithmId,
+        recall: req.body.recall,
+        epochs: req.body.epochs,
+        notifyEmail: req.body.notifyEmail,
+      }
+    });
+
+    res.status(201);
   } else {
     res.status(405)
   }

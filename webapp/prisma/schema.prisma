@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// datasource db {
+//   provider = "sqlite"
+//   url      = env("DATABASE_URL")
+// }
+
+model Dataset {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  hash      String
+  isCustom  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  jobs Job[]
+}
+
+enum Scenario {
+  filter
+  progress
+  verify
+}
+
+enum Param {
+  recall
+  epochs
+}
+
+model Algorithm {
+  id        Int        @id @default(autoincrement())
+  code      String     @unique
+  name      String
+  scenarios Scenario[]
+  params    Param[]
+  createdAt DateTime   @default(now())
+
+  jobs Job[]
+}
+
+enum Status {
+  pending
+  running
+  completed
+  failed
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  status      Status   @default(pending)
+  datasetId   Int
+  algorithmId Int
+  scenario    Scenario
+  recall      Float?
+  epochs      Int?
+  notifyEmail String?
+  createdAt   DateTime @default(now())
+
+  algorithm Algorithm @relation(fields: [algorithmId], references: [id])
+  dataset   Dataset   @relation(fields: [datasetId], references: [id])
+  result    Result?
+}
+
+// the model should share id with Jobs
+model Result {
+  job   Job    @relation(fields: [jobId], references: [id])
+  jobId String @id
+
+  f1        Float?
+  precision Float?
+  recall    Float?
+  maxMem    Int?
+  elapsed   BigInt
+  createdAt DateTime @default(now())
+}
