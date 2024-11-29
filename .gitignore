@@ -10,7 +10,3 @@ embedding
 /apptainer
 /input
 /output
-
-train.csv
-test.csv
-val.csv

@@ -15,7 +15,6 @@ In the first iteration, we process the dataset with a splitter, which generates 
 Then the methods receive all 5 files: `tableA.csv`, `tableB.csv`, `matches.csv`, `train.csv`, and `test.csv` as input.
 
 ## Sources
-- https://github.com/anhaidgroup/deepmatcher/blob/master/Datasets.md
 - https://github.com/AI-team-UoA/pyJedAI/tree/main/data/ccer
+- https://github.com/anhaidgroup/deepmatcher/blob/master/Datasets.md
 - https://zenodo.org/records/8164151/files/magellanExistingDatasets.tar.gz
-- https://github.com/AI-team-UoA/pyJedAI/tree/main/data/ccer/D2
