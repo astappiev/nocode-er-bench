@@ -11,12 +11,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Download the pre-trained model on English Wikipedia
 # ADD https://zenodo.org/record/6466387/files/wiki.en.bin /workspace/embedding/wiki.en.bin
 
+COPY fork-deepmatcher .
 COPY entrypoint.py .
 COPY transform.py .
 
-# fix issue https://github.com/anhaidgroup/deepmatcher/issues/3
-RUN sed -i 's/return getattr(self, name)/return self._modules[name]/' /opt/conda/lib/python3.7/site-packages/deepmatcher/models/modules.py
-RUN sed -i 's/return cum_stats.f1()/return cum_stats/' /opt/conda/lib/python3.7/site-packages/deepmatcher/runner.py
+ENV PYTHONPATH="${PYTHONPATH}:/workspace/fork-deepmatcher/deepmatcher"
 
 # This allows to run the container as `docker run --rm <yourImageName> <args>`
 ENTRYPOINT ["python", "-u", "./entrypoint.py"]

@@ -11,6 +11,7 @@ From: pytorch/pytorch:1.10.0-cuda11.3-cudnn8-runtime
 
 %files
     requirements.txt /srv
+    fork-deepmatcher /srv
     entrypoint.py /srv
     transform.py /srv
 
@@ -22,9 +23,8 @@ From: pytorch/pytorch:1.10.0-cuda11.3-cudnn8-runtime
     cd /srv
     pip install --no-cache-dir -r requirements.txt
 
-    # fix issue https://github.com/anhaidgroup/deepmatcher/issues/3
-    sed -i 's/return getattr(self, name)/return self._modules[name]/' /opt/conda/lib/python3.7/site-packages/deepmatcher/models/modules.py
-    sed -i 's/return cum_stats.f1()/return cum_stats/' /opt/conda/lib/python3.7/site-packages/deepmatcher/runner.py
+%environment
+    export PYTHONPATH="${PYTHONPATH}:/srv/fork-deepmatcher/deepmatcher"
 
 %runscript
     exec python -u /srv/entrypoint.py  "$@"

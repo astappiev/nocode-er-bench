@@ -25,14 +25,3 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 apptainer build ~/nocode-er-bench/apptainer/deepmatcher.sif container.def
 apptainer run ~/nocode-er-bench/apptainer/deepmatcher.sif ~/nocode-er-bench/input/ ~/nocode-er-bench/output/ ~/nocode-er-bench/embedding/
 ```
-
-## GPU Error
-
-```bash
-Traceback (most recent call last):
-  File "/srv/entrypoint.py", line 58, in <module>
-    transform_output(stats, test_time, test_max_mem, args.output)
-  File "/srv/transform.py", line 8, in transform_output
-    'f1': [stats.f1()],
-AttributeError: 'Tensor' object has no attribute 'f1'
-```

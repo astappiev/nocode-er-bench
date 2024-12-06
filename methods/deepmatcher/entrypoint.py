@@ -15,6 +15,8 @@ parser.add_argument('output', type=pathtype.Path(writable=True), nargs='?', defa
                     help='Output directory to store the output')
 parser.add_argument('embedding', type=pathtype.Path(readable=True), nargs='?', default='/workspace/embedding',
                     help='The directory where embeddings are stored')
+parser.add_argument('-e', '--epochs', type=int, nargs='?', default=15,
+                    help='Number of epochs to train the model')
 
 args = parser.parse_args()
 
@@ -45,7 +47,7 @@ train, test = datasets[0], datasets[1] if len(datasets) >= 2 else None
 model = dm.MatchingModel()
 
 start_time = time.time()
-model.run_train(train, test, epochs=15, best_save_path='best_model.pth')
+model.run_train(train, test, epochs=args.epochs)
 train_time = time.time() - start_time
 train_max_mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 

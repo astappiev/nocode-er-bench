@@ -1,0 +1,3 @@
+[submodule "methods/deepmatcher/fork-deepmatcher"]
+	path = methods/deepmatcher/fork-deepmatcher
+	url = git@github.com:erbench/fork-deepmatcher.git
