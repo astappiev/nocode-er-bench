@@ -23,5 +23,5 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 
 ```bash
 apptainer build ~/nocode-er-bench/apptainer/deepmatcher.sif container.def
-apptainer run ~/nocode-er-bench/apptainer/deepmatcher.sif ~/nocode-er-bench/input/ ~/nocode-er-bench/output/ ~/nocode-er-bench/embedding/
+apptainer run ~/nocode-er-bench/apptainer/deepmatcher.sif ~/nocode-er-bench/datasets/d1_fodors_zagats/ ~/nocode-er-bench/output/ ~/nocode-er-bench/embedding/
 ```

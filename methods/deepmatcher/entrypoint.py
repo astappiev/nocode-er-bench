@@ -1,3 +1,6 @@
+import sys
+sys.path.append('fork-deepmatcher')
+
 import argparse
 import resource
 import time

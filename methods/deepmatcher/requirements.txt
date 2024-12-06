@@ -2,7 +2,7 @@ pathtype
 pandas
 
 # deepmatcher requirements
-torch>=1.0
+torch>=1.10
 tqdm
 pyprind
 six
