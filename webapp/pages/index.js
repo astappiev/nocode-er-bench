@@ -15,7 +15,10 @@ export const getServerSideProps = async ({req}) => {
   const datasets = await prisma.dataset.findMany();
 
   return {
-    props: {datasets, algorithms}
+    props: {
+      algorithms:  JSON.parse(JSON.stringify(algorithms)),
+      datasets: JSON.parse(JSON.stringify(datasets)),
+    }
   }
 }
 
@@ -109,7 +112,16 @@ export default function Home({datasets, algorithms}) {
             below</small>
         </div>
 
-        <div className="flex flex-column gap-2 mb-3">
+        {/*<div className="flex flex-column gap-2 mb-3">
+          <label htmlFor="epochs">Epochs</label>
+          <InputNumber id="epochs" aria-describedby="epochs-help" className="w-full"
+                       value={epochs} onValueChange={(e) => setEpochs(e.value)}
+                       disabled={formDisabled}
+                       minFractionDigits={0} min={5} max={50} step={5} showButtons/>
+          <small id="epochs-help">A numbers of epochs to run</small>
+        </div>*/}
+
+        {/*<div className="flex flex-column gap-2 mb-3">
           <label htmlFor="dataset_file">Own dataset</label>
           <FileUpload id="dataset_file" aria-describedby="dataset_first-help" mode="basic"
                       name="dataset_file[]" accept="text/*" maxFileSize={1000000}
@@ -125,11 +137,11 @@ export default function Home({datasets, algorithms}) {
                       name="dataset_file[]" accept="text/*" maxFileSize={1000000}
                       disabled={formDisabled}/>
           <small id="dataset_ground-help">Ground truth</small>
-        </div>
+        </div>*/}
       </div>
 
       <div className="col">
-        <h2>Model parameters</h2>
+        <h2>Model</h2>
 
         <div className="flex flex-column gap-2 mb-3">
           <label htmlFor="algorithm">Algorithm</label>
@@ -161,7 +173,7 @@ export default function Home({datasets, algorithms}) {
                          value={epochs} onValueChange={(e) => setEpochs(e.value)}
                          disabled={formDisabled}
                          minFractionDigits={0} min={5} max={50} step={5} showButtons/>
-            <small id="epochs-help">A recall value between 0 and 1</small>
+            <small id="epochs-help">A numbers of epochs to run</small>
           </div>
         </div>
       </div>
